@@ -34,13 +34,19 @@
     <video autoplay="true" id="videoElement"></video>
     <canvas width='500' height='375' id="canvas"></canvas>
   </div>
-  <button id="detect">detect</button>
+  <button id="detectFace">detect face</button>
+  <!-- looks like google decided this wasn't stable enough to move forward with it. It is recognizing
+    that there is text very well, but it isn't actually parsing it -->
+  <!-- <button id="detectText">detect text</button> -->
 
   <script>
 
     const video = document.querySelector("#videoElement");
-    const button = document.querySelector("#detect");
+    const faceButton = document.querySelector("#detectFace");
+    // const textButton = document.querySelector("#detectText");
     const canvas = document.querySelector('#canvas');
+    const ctx = canvas.getContext('2d');
+
 
     if (navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({video: true})
@@ -53,13 +59,12 @@
     }
 
     // const detector = new BarcodeDetector();
-    // const detector = new TextDetector();
-    const detector = new FaceDetector({ maxDetectedFaces: 10 });
+    // const textDetector = new TextDetector();
+    const faceDetector = new FaceDetector({ maxDetectedFaces: 10 });
 
     const ratio = 1.3;
 
     const drawBoundingBoxes = (faces) => {
-      const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       faces.map(face => {
         ctx.rect(face.boundingBox.x / ratio, face.boundingBox.y / ratio, face.boundingBox.width / ratio, face.boundingBox.height / ratio);
@@ -68,13 +73,21 @@
       });
     }
 
-    button.addEventListener('click', () => {
+    faceButton.addEventListener('click', () => {
       setInterval(() => {
-        detector.detect(video)
+        faceDetector.detect(video)
           .then(drawBoundingBoxes)
           .catch(console.error('something went wrong'));
       }, 100);
     });
+
+    // textButton.addEventListener('click', () => {
+    //   setInterval(() => {
+    //     textDetector.detect(video)
+    //       .then((text) => console.log(text))
+    //       .catch(console.error('something went wrong'));
+    //   }, 1000);
+    // });
 
   </script>
 </body>
