@@ -1,0 +1,77 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>face detection</title>
+
+  <style>
+    #container {
+      margin: 0px auto;
+      width: 500px;
+      height: 375px;
+      border: 10px #333 solid;
+      position: relative;
+    }
+    #videoElement {
+        width: 500px;
+        height: 375px;
+        background-color: #666;
+    }
+    #canvas {
+      width: 500px;
+      height: 375px;
+      border: #666 solid 1px;
+      position: absolute;
+      top: 0;
+
+    }
+  </style>
+
+</head>
+<body>
+  <div id="container">
+    <video autoplay="true" id="videoElement"></video>
+    <canvas width='500' height='375' id="canvas"></canvas>
+  </div>
+  <button id="detect">detect</button>
+
+  <script>
+
+    const video = document.querySelector("#videoElement");
+    const button = document.querySelector("#detect");
+    const canvas = document.querySelector('#canvas');
+    const ctx = canvas.getContext('2d');
+
+    if (navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({video: true})
+      .then(function(stream) {
+        video.srcObject = stream;
+      })
+      .catch(function(err0r) {
+        console.log("Something went wrong!");
+      });
+    }
+
+    // const detector = new BarcodeDetector();
+    // const detector = new TextDetector();
+    const detector = new FaceDetector({ maxDetectedFaces: 10 });
+
+    const ratio = 1.2;
+
+    button.addEventListener('click', () => {
+      detector.detect(video)
+        .then((faces) => {
+          faces.map(face => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.rect(face.boundingBox.x / ratio, face.boundingBox.y / ratio, face.boundingBox.width / ratio, face.boundingBox.height / ratio);
+            ctx.stroke();
+            return face;
+          });
+        })
+        .catch(console.error);
+    });
+
+  </script>
+</body>
+</html>
