@@ -41,7 +41,6 @@
     const video = document.querySelector("#videoElement");
     const button = document.querySelector("#detect");
     const canvas = document.querySelector('#canvas');
-    const ctx = canvas.getContext('2d');
 
     if (navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({video: true})
@@ -57,19 +56,24 @@
     // const detector = new TextDetector();
     const detector = new FaceDetector({ maxDetectedFaces: 10 });
 
-    const ratio = 1.2;
+    const ratio = 1.3;
+
+    const drawBoundingBoxes = (faces) => {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      faces.map(face => {
+        ctx.rect(face.boundingBox.x / ratio, face.boundingBox.y / ratio, face.boundingBox.width / ratio, face.boundingBox.height / ratio);
+        ctx.stroke();
+        return face;
+      });
+    }
 
     button.addEventListener('click', () => {
-      detector.detect(video)
-        .then((faces) => {
-          faces.map(face => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.rect(face.boundingBox.x / ratio, face.boundingBox.y / ratio, face.boundingBox.width / ratio, face.boundingBox.height / ratio);
-            ctx.stroke();
-            return face;
-          });
-        })
-        .catch(console.error);
+      setInterval(() => {
+        detector.detect(video)
+          .then(drawBoundingBoxes)
+          .catch(console.error('something went wrong'));
+      }, 100);
     });
 
   </script>
